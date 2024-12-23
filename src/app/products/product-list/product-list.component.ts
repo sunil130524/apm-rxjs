@@ -1,8 +1,10 @@
-import { Component } from '@angular/core';
+import { Component, inject, OnDestroy, OnInit } from '@angular/core';
 
 import { NgIf, NgFor, NgClass } from '@angular/common';
 import { Product } from '../product';
 import { ProductDetailComponent } from '../product-detail/product-detail.component';
+import { ProductService } from '../product.service';
+import { Subscription } from 'rxjs';
 
 @Component({
     selector: 'pm-product-list',
@@ -10,16 +12,28 @@ import { ProductDetailComponent } from '../product-detail/product-detail.compone
     standalone: true,
   imports: [NgIf, NgFor, NgClass, ProductDetailComponent]
 })
-export class ProductListComponent {
-  // Just enough here for the template to compile
+export class ProductListComponent implements OnInit, OnDestroy {
   pageTitle = 'Products';
   errorMessage = '';
+  getProductsSub!: Subscription
+
+  private productService = inject(ProductService);
 
   // Products
   products: Product[] = [];
 
   // Selected product id to highlight the entry
   selectedProductId: number = 0;
+
+  ngOnInit(): void {
+    this.getProductsSub = this.productService.getProducts().subscribe(
+      (products) => this.products = products
+    )
+  }
+
+  ngOnDestroy(): void {
+    this.getProductsSub.unsubscribe();
+  }
 
   onSelected(productId: number): void {
     this.selectedProductId = productId;
