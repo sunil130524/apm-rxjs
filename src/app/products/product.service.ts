@@ -1,6 +1,6 @@
-import { HttpClient } from '@angular/common/http';
+import { HttpClient, HttpErrorResponse } from '@angular/common/http';
 import { inject, Injectable } from '@angular/core';
-import { Observable, tap } from 'rxjs';
+import { catchError, Observable, of, tap } from 'rxjs';
 import { Product } from './product';
 
 @Injectable({
@@ -14,7 +14,8 @@ export class ProductService {
   getProducts(): Observable<Product[]> {
     return this.http.get<Product[]>(this.productsUrl)
       .pipe(
-        tap(data => console.log(data))
+        tap(data => console.log(data)),
+        catchError(err => this.handleError(err))
       )
   }
 
@@ -22,8 +23,13 @@ export class ProductService {
     const productUrl = this.productsUrl + '/' + id;
     return this.http.get<Product>(productUrl)
       .pipe(
-        tap(data => console.log(data))
+        tap(data => console.log(data)),
+        catchError(err => this.handleError(err))
       )
+  }
+
+  handleError(err: HttpErrorResponse): Observable<never>  {
+    throw 'Something is wrong! Please try again!';
   }
 
 }
